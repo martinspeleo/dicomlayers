@@ -1,0 +1,7 @@
+django
+pip
+numpy
+pyDICOM
+South
+glymur
+pillow

@@ -1,0 +1,11 @@
+{"type":"FeatureCollection",
+"features":[
+{% for structure in structures %}
+{"type":"Feature",
+ "properties":{"name": "{{ structure.structure_type.name }}", "pk": "{{ structure.pk }}"},
+             "geometry":{"type":"Polygon","coordinates": {{ structure.json }}}
+           }{% if not forloop.last %},{% endif %}
+{% endfor %}
+]}
+
+

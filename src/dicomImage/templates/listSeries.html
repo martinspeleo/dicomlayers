@@ -1,0 +1,6 @@
+{% load url from future %}
+<ul>
+{% for s in series %}
+<li><a href="{% url 'view_series' s.id%}">{{ s.uid }}</a></li>
+{% endfor %}
+</ul>

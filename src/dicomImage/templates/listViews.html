@@ -1,0 +1,6 @@
+{% load url from future %}
+<ul>
+{% for v in views %}
+<li><a href="{% url 'view' v.id%}">{{ v.name }}</a></li>
+{% endfor %}
+</ul>

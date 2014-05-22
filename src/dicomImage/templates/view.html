@@ -1,0 +1,199 @@
+{% load url from future %}
+{% load staticfiles %}
+{% load tile %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>OpenLayers Basic Single WMS Example</title>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <link rel="stylesheet" href="{% static 'OpenLayers-2.13/theme/default/style.css' %}" type="text/css">
+    <script src="{% static 'OpenLayers-2.13/OpenLayers.js' %}"></script>
+    <style type="text/css">
+        .olControlPanel div { 
+          display:block;
+          width:  24px;
+          height: 24px;
+          margin: 5px;
+          opacity: 1.0; 
+        }
+        
+        .olControlPanel .olControlNavigationItemActive { 
+          width:  24px;  
+          height: 22px;
+          background-image: url({% static 'OpenLayers-2.13/theme/default/img/pan_on.png' %});
+        }
+        .olControlPanel .olControlNavigationItemInactive { 
+          width:  24px;  
+          height: 22px;
+          background-image: url({% static 'OpenLayers-2.13/theme/default/img/pan_off.png' %});
+        }
+        .olControlPanel .olControlZoomInItemInactive { 
+          width:  18px;  
+          height: 18px;
+          background-image: url({% static 'OpenLayers-2.13/img/zoom-plus-mini.png' %});
+        }
+        .olControlPanel .olControlZoomOutItemInactive { 
+          width:  18px;  
+          height: 18px;
+          background-image: url({% static 'OpenLayers-2.13/img/zoom-minus-mini.png' %});
+        }
+        .olControlPanel .olControlDrawFeatureItemActive.olButton{ 
+          width:  24px;  
+          height: 22px;
+          background-image: url({% static 'OpenLayers-2.13/theme/default/img/draw_polygon_on.png' %});
+        }
+        .olControlPanel .olControlDrawFeatureItemInactive.olButton{ 
+          width:  24px;  
+          height: 22px;
+          background-image: url({% static 'OpenLayers-2.13/theme/default/img/draw_polygon_off.png' %});
+        }
+        .olControlPanel .olControlModifyFeatureItemActive.olButton{ 
+          width:  24px;  
+          height: 22px;
+          background-image: url({% static 'OpenLayers-2.13/theme/default/img/draw_point_on.png' %});
+        }
+        .olControlPanel .olControlModifyFeatureItemInactive.olButton{ 
+          width:  24px;  
+          height: 22px;
+          background-image: url({% static 'OpenLayers-2.13/theme/default/img/draw_point_off.png' %});
+        }
+        
+    </style>
+    <script type="text/javascript">
+
+        var map;
+        var panel;
+        var slider;
+        function init(){
+            //var styleMap = new OpenLayers.StyleMap({strokeColor: "#ff0000"});
+            var myStyles = new OpenLayers.StyleMap({
+                "default": new OpenLayers.Style({
+                    fillColor: "#ffcc66",
+                    strokeColor: "#ff9933",
+                    strokeWidth: 2,
+                    graphicZIndex: 1
+                }),
+                "select": new OpenLayers.Style({
+                    fillColor: "#66ccff",
+                    strokeColor: "#3399ff",
+                    graphicZIndex: 2,
+                    graphicZIndex: 1
+                })
+            });
+            map = new OpenLayers.Map( 'map', { controls: [] } );
+            map.addControl(new OpenLayers.Control.LayerSwitcher());
+            var scrollControl = new OpenLayers.Control();
+            
+	    var keyboardCallbacks = { keydown: function(evt) {
+					    switch(evt.keyCode) {
+						case 33: //Page Up
+						case 38: //Up
+						    next_image();
+                                                    break;
+						case 34: //Page Down
+						case 40: //Down
+						    previous_image();
+					    }
+					}
+				};
+	    var mouseWheelCallbacks = {up: next_image, 
+                                       down: previous_image};
+            var keyScrollHandler = new OpenLayers.Handler.Keyboard(scrollControl, keyboardCallbacks);
+            var mouseWheelScrollHandler = new OpenLayers.Handler.MouseWheel(scrollControl, mouseWheelCallbacks);
+            keyScrollHandler.activate();
+            mouseWheelScrollHandler.activate();
+            scrollControl.activate();
+	    map.addControl(scrollControl);
+            slider = $( "#slider" ).slider({ orientation: "vertical", 
+                                             max: {{ view.image_series.total_images }}, 
+                                             min: 0,
+                                             change: function( event, ui ) {
+                                                         set_depth(ui.value);
+                                                         }  
+                                            });
+            set_depth(slider.slider( "value" ));
+            map.zoomToMaxExtent();
+        }
+        
+        function next_image(evt) {slider.slider( "value", slider.slider( "value" ) + 1)} 
+        function previous_image(evt) {slider.slider( "value", slider.slider( "value" ) - 1)} 
+          
+        function set_depth(n){            
+            var original_layers = [];
+            $(map.layers).each(function( index ) {
+                                                   original_layers.push(this);
+                                                      }
+                                   );
+            var currentLayerIndex = map.getLayerIndex(map.baseLayer);
+            var tiles_lung = new OpenLayers.Layer.XYZ("Lung window", 
+                                                 "{% tile view.image_series.pk 1200 600 %}".replace("depth", n), 
+                                                 {isBaseLayer: true,
+                                                  maxExtent: [0, 0, 255, 255]});
+            var tiles_bone = new OpenLayers.Layer.XYZ("Bone window", 
+                                                 "{% tile view.image_series.pk 1024 1500 %}".replace("depth", n), 
+                                                 {isBaseLayer: true,
+                                                  maxExtent: [0, 0, 255, 255]});
+            var tiles_fat = new OpenLayers.Layer.XYZ("Fat window", 
+                                                 "{% tile view.image_series.pk 400 1000 %}".replace("depth", n), 
+                                                 {isBaseLayer: true,
+                                                  maxExtent: [0, 0, 255, 255]});
+            map.addLayer(tiles_lung);
+            map.addLayer(tiles_bone);
+            map.addLayer(tiles_fat);
+
+            var polygonLayer = new OpenLayers.Layer.Vector("Organs", {
+                    strategies: [new OpenLayers.Strategy.Fixed(),
+                                 new OpenLayers.Strategy.Save({auto: true})],
+                    protocol: new OpenLayers.Protocol.HTTP({
+                        url: "{% structures view.pk %}".replace("depth", n),
+                        headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                        format: new OpenLayers.Format.GeoJSON()
+                    })
+                });
+            if (panel) {
+                map.removeControl(panel);
+                panel.destroy();}
+            var navigationcontrol = new OpenLayers.Control.Navigation({zoomWheelEnabled: false})
+            panel = new OpenLayers.Control.Panel({defaultControl: navigationcontrol});
+            map.addControl(panel);
+            panel.addControls([new OpenLayers.Control.ZoomIn(),
+                               new OpenLayers.Control.ZoomOut(),
+                               navigationcontrol,
+                               new OpenLayers.Control.DrawFeature(polygonLayer,
+                                                                  OpenLayers.Handler.Polygon,
+                                                                  {handlerOptions: {foo: "bar"},
+                                                                   featureAdded: function() {
+                                                                       alert("Drawn");}
+                                                                     }),
+                               new OpenLayers.Control.ModifyFeature(polygonLayer, {bySegment: true, autoActivate: true})
+                               ]);
+            map.addLayer(polygonLayer);
+            $(original_layers).each(function( index ) {
+                                                   map.removeLayer(this);
+                                                      }
+                                   );
+            map.setBaseLayer(map.layers[currentLayerIndex]);
+        }
+
+    </script>
+  </head>
+  <body onload="init()">
+    <h1 id="title">Anatomy</h1>
+
+    <div id="map" class="smallmap" style="width: 512px; height: 512px; border: 1px solid #ccc;float: left;"></div>
+    <div id="slider" style="margin-left: 514px; height: 512px;"></div>
+    <div id="structures">
+{% for structure_type in structure_types %}
+  <input type="radio" name="structure_type" value="{{ structure_type }}">{{ structure_type }}<br>
+{% endfor %}
+</div>
+
+<form action="." method="post">{% csrf_token %}<input type="submit" value="Submit"></form>
+
+  </body>
+</html>

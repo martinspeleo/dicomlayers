@@ -69,11 +69,6 @@
         var map;
         var panel;
         var slider;
-        var myStyles;
-        var colorArray = new Array();
-        colorArray["Prostate"] = '#800026';
-        colorArray["Rectum"] = '#FFEDA0';
-
         function init(){
             //var styleMap = new OpenLayers.StyleMap({strokeColor: "#ff0000"});
             var myStyles = new OpenLayers.StyleMap({
@@ -120,7 +115,7 @@
                                              change: function( event, ui ) {
                                                          set_depth(ui.value);
                                                          }  
-                                            });	
+                                            });
             set_depth(slider.slider( "value" ));
             map.zoomToMaxExtent(); 
             $("input[name='structure_type']").change(function(){
@@ -155,24 +150,10 @@
             map.addLayer(tiles_fat);
 
             var polygonLayer = new OpenLayers.Layer.Vector("Organs", {
-                    strategies: [new OpenLayers.Strategy.Fixed()],
-                    styleMap: new OpenLayers.StyleMap({ 
-                 "default": new OpenLayers.Style({ 
-                            fillColor: "${getColor}",                         
-                            strokeColor: "${getColor}", 
-                            fillOpacity: 0.5, 
-                            graphicZIndex: 1 
-                        },
-                        {
-                            context: {
-                                getColor : function (feature) {
-                                    return colorArray[feature.attributes.name];
-                                }
-                            } 
-                        })
-                   }),
+                    strategies: [new OpenLayers.Strategy.Fixed(),
+                                 new OpenLayers.Strategy.Save({auto: true})],
                     protocol: new OpenLayers.Protocol.HTTP({
-                        url: "{% all_structures view.pk 1 %}".replace("depth", n),
+                        url: "{% structures view.pk 1 %}".replace("depth", n).replace("StructureType", $("input[name='structure_type']:checked").val()),
                         headers: {"X-CSRFToken": "{{ csrf_token }}"},
                         format: new OpenLayers.Format.GeoJSON()
                     })
@@ -185,7 +166,13 @@
             map.addControl(panel);
             panel.addControls([new OpenLayers.Control.ZoomIn(),
                                new OpenLayers.Control.ZoomOut(),
-                               navigationcontrol
+                               navigationcontrol,
+                               new OpenLayers.Control.DrawFeature(polygonLayer,
+                                                                  OpenLayers.Handler.Polygon,
+                                                                  {handlerOptions: {foo: "bar"},
+                                                                   
+                                                                     }),
+                               new OpenLayers.Control.ModifyFeature(polygonLayer, {bySegment: true, autoActivate: true})
                                ]);
             map.addLayer(polygonLayer);
             $(original_layers).each(function( index ) {

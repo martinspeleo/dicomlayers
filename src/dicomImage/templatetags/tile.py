@@ -11,6 +11,10 @@ def structures(series_pk, structure_type_pk):
     #the reverse function URL encodes the result, however we want to produce a pattern for OpenLayers, hence %7B needs changing back to { and %7D to }
     return reverse('structures', args=[series_pk, "depth", "StructureType"])
 
+def all_structures(series_pk, structure_type_pk):
+    #the reverse function URL encodes the result, however we want to produce a pattern for OpenLayers, hence %7B needs changing back to { and %7D to }
+    return reverse('all_structures', args=[series_pk, "depth"])
 
 register.simple_tag(tile)
 register.simple_tag(structures)
+register.simple_tag(all_structures)

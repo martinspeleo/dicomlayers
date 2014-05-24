@@ -62,7 +62,7 @@ def list_views(request):
 
 def home(request):
     return render(request, 'home.html', {"views": View.objects.all(), 
-                                         "structures": Structure.objects.all()})
+                                         "structure_types": StructureType.objects.all()})
 
 def view(request, view_pk):
     v = View.objects.get(pk = view_pk)
@@ -71,24 +71,24 @@ def view(request, view_pk):
                   {"view": v, 
                    "structure_types": StructureType.objects.all()})
 
-def structures(request, view_pk, depth):
+def structures(request, view_pk, depth, structure_type_pk):
     if request.method == 'GET':
         return render(request, 
                       'structures.json', 
                       {"structures": Structure.objects.filter(slice_location = depth,
+                                                              structure_type__pk = structure_type_pk,
                                                               view__pk = view_pk)})
     else:
-        print request.raw_post_data
         new_structure = json.loads(request.raw_post_data)
         s = Structure(slice_location = depth,
                       view = View.objects.get(pk = view_pk),
-                      structure_type = StructureType.objects.all()[0],
+                      structure_type = StructureType.objects.get(pk = structure_type_pk),
                       json = new_structure["features"][0]['geometry']['coordinates'])
         s.save()
         return HttpResponse(status=204)
 
 
-def structures_modify(request, view_pk, depth):
+def structures_modify(request, view_pk, depth, structure_type_pk):
     if request.method == 'PUT':
         modified_structure = json.loads(request.raw_post_data)
         s = Structure.objects.get(pk=modified_structure['properties']['pk'])

@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 
 import views
 
-structures_url = r'^structures/(.+)/(.+)\.json'
+structures_url = r'^structures/(.+)/(.+)/(.+)\.json'
 
 urlpatterns = patterns('',
 #    url(r'^import_index$', views.import_index, name='import_index'),

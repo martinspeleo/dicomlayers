@@ -117,7 +117,10 @@
                                                          }  
                                             });
             set_depth(slider.slider( "value" ));
-            map.zoomToMaxExtent();
+            map.zoomToMaxExtent(); 
+            $("input[name='structure_type']").change(function(){
+                set_depth(slider.slider( "value" ));
+            });
         }
         
         function next_image(evt) {slider.slider( "value", slider.slider( "value" ) + 1)} 
@@ -150,7 +153,7 @@
                     strategies: [new OpenLayers.Strategy.Fixed(),
                                  new OpenLayers.Strategy.Save({auto: true})],
                     protocol: new OpenLayers.Protocol.HTTP({
-                        url: "{% structures view.pk %}".replace("depth", n),
+                        url: "{% structures view.pk 1 %}".replace("depth", n).replace("StructureType", $("input[name='structure_type']:checked").val()),
                         headers: {"X-CSRFToken": "{{ csrf_token }}"},
                         format: new OpenLayers.Format.GeoJSON()
                     })
@@ -167,8 +170,7 @@
                                new OpenLayers.Control.DrawFeature(polygonLayer,
                                                                   OpenLayers.Handler.Polygon,
                                                                   {handlerOptions: {foo: "bar"},
-                                                                   featureAdded: function() {
-                                                                       alert("Drawn");}
+                                                                   
                                                                      }),
                                new OpenLayers.Control.ModifyFeature(polygonLayer, {bySegment: true, autoActivate: true})
                                ]);
@@ -189,11 +191,9 @@
     <div id="slider" style="margin-left: 514px; height: 512px;"></div>
     <div id="structures">
 {% for structure_type in structure_types %}
-  <input type="radio" name="structure_type" value="{{ structure_type }}">{{ structure_type }}<br>
+  <input type="radio" name="structure_type" value="{{ structure_type.pk }}">{{ structure_type }}<br>
 {% endfor %}
 </div>
-
-<form action="." method="post">{% csrf_token %}<input type="submit" value="Submit"></form>
 
   </body>
 </html>

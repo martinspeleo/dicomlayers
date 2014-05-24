@@ -71,8 +71,9 @@
         var slider;
         var myStyles;
         var colorArray = new Array();
-        colorArray["Prostate"] = '#800026';
-        colorArray["Rectum"] = '#FFEDA0';
+        {% for structure_type in structure_types %}
+        colorArray["{{ structure_type.name }}"] = '#{{ structure_type.colour }}';
+        {% endfor %}
 
         function init(){
             //var styleMap = new OpenLayers.StyleMap({strokeColor: "#ff0000"});
@@ -126,6 +127,11 @@
             $("input[name='structure_type']").change(function(){
                 set_depth(slider.slider( "value" ));
             });
+            $("span.structure").hover(function(){
+                alert(this.id);
+            }, function(){
+                alert(this.id);
+            });
         }
         
         function next_image(evt) {slider.slider( "value", slider.slider( "value" ) + 1)} 
@@ -161,14 +167,14 @@
                             fillColor: "${getColor}",                         
                             strokeColor: "${getColor}", 
                             fillOpacity: 0.5, 
-                            graphicZIndex: 1 
+                            graphicZIndex: 1
                         },
                         {
                             context: {
                                 getColor : function (feature) {
                                     return colorArray[feature.attributes.name];
                                 }
-                            } 
+                            }
                         })
                    }),
                     protocol: new OpenLayers.Protocol.HTTP({
@@ -204,7 +210,7 @@
     <div id="slider" style="margin-left: 514px; height: 512px;"></div>
     <div id="structures">
 {% for structure_type in structure_types %}
-  <input type="radio" name="structure_type" value="{{ structure_type.pk }}">{{ structure_type }}<br>
+  <input type="checkbox" name="structure" value="{{ structure_type }}" >{{ structure_type }}</span>
 {% endfor %}
 </div>
 

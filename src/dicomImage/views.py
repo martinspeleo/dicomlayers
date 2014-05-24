@@ -59,6 +59,11 @@ def load_all(request):
 def list_views(request):
     return render(request, 'listViews.html', {"views": View.objects.all()})
 
+
+def home(request):
+    return render(request, 'home.html', {"views": View.objects.all(), 
+                                         "structures": Structure.objects.all()})
+
 def view(request, view_pk):
     v = View.objects.get(pk = view_pk)
     return render(request, 

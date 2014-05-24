@@ -6,6 +6,7 @@ structures_url = r'^structures/(.+)/(.+)\.json'
 
 urlpatterns = patterns('',
 #    url(r'^import_index$', views.import_index, name='import_index'),
+    url(r'^$', views.home, name='home'),
     url(r'^load_all$', views.load_all, name='load_all'),
     url(r'^list_views$', views.list_views, name = 'list_views'),
     url(r'^view/(.+)$', views.view, name = 'view'),

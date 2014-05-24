@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+    <h2>Content for My App</h2>
+<a href="/admin">Admin</a>
+<ul>
+{% for v in views %}
+<li><a href="{% url 'view' v.id%}">{{ v.name }}</a></li>
+{% endfor %}
+</ul>
+<ul>
+{% for s in sructures %}
+<li>{{ s.name }}</li>
+{% endfor %}
+</ul>
+{% endblock %}

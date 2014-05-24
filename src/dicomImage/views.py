@@ -86,7 +86,7 @@ def structures(request, view_pk, depth, structure_type_pk):
                                                               structure_type__pk = structure_type_pk,
                                                               view__pk = view_pk)})
     else:
-        new_structure = json.loads(request.raw_post_data)
+        new_structure = json.loads(request.body)
         s = Structure(slice_location = depth,
                       view = View.objects.get(pk = view_pk),
                       structure_type = StructureType.objects.get(pk = structure_type_pk),
@@ -102,7 +102,7 @@ def all_structures(request, view_pk, depth):
 
 def structures_modify(request, view_pk, depth, structure_type_pk):
     if request.method == 'PUT':
-        modified_structure = json.loads(request.raw_post_data)
+        modified_structure = json.loads(request.body)
         s = Structure.objects.get(pk=modified_structure['properties']['pk'])
         s.json = modified_structure['geometry']['coordinates']
         s.save()

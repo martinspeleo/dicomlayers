@@ -100,10 +100,15 @@
 						case 33: //Page Up
 						case 38: //Up
 						    next_image();
+
+                                                    evt.preventDefault();
+                                                    return false;
                                                     break;
 						case 34: //Page Down
 						case 40: //Down
 						    previous_image();
+                                                    evt.preventDefault();
+                                                    return false;
 					    }
 					}
 				};

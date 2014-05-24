@@ -71,6 +71,13 @@ def view(request, view_pk):
                   {"view": v, 
                    "structure_types": StructureType.objects.all()})
 
+def edit(request, view_pk):
+    v = View.objects.get(pk = view_pk)
+    return render(request, 
+                  'edit.html', 
+                  {"view": v, 
+                   "structure_types": StructureType.objects.all()})
+
 def structures(request, view_pk, depth, structure_type_pk):
     if request.method == 'GET':
         return render(request, 
@@ -87,6 +94,11 @@ def structures(request, view_pk, depth, structure_type_pk):
         s.save()
         return HttpResponse(status=204)
 
+def all_structures(request, view_pk, depth):
+    return render(request, 
+                      'structures.json', 
+                      {"structures": Structure.objects.filter(slice_location = depth,
+                                                              view__pk = view_pk)})
 
 def structures_modify(request, view_pk, depth, structure_type_pk):
     if request.method == 'PUT':

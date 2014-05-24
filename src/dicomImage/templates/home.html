@@ -7,7 +7,7 @@
 Views
 <ul>
 {% for v in views %}
-<li><a href="{% url 'view' v.id%}">{{ v.name }}</a></li>
+<li><a href="{% url 'view' v.id%}">{{ v.name }}</a>(<a href="{% url 'edit' v.id%}">Edit</a>)</li>
 {% endfor %}
 </ul>
 Structures

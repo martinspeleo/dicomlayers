@@ -36,6 +36,7 @@ class Image(models.Model):
     
 class StructureType(models.Model):
     name = models.TextField()
+    colour = models.CharField(max_length=6)
     parent = models.ForeignKey('StructureType', blank=True, null=True)
     def __unicode__(self):
         return self.name
